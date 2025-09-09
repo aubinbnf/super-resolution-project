@@ -1,0 +1,5 @@
+outs:
+- md5: d6b2e7d7013c5a1737d8a0bca2e19aa5
+  size: 280169
+  hash: md5
+  path: srcnn_baseline.pth
