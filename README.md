@@ -43,7 +43,7 @@ chmod +x scripts/download_data.sh
 python3 src/data/prepare_data.py \
     --data_dir data/raw/DIV2K \
     --output_dir data/processed/DIV2K \
-    --scales 2 3 4
+    --scales 2 4 8
 ```
 
 ### Option 2 : With DVC

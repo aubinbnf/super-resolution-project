@@ -11,7 +11,7 @@ def generate_lr_images(hr_dir, output_dir, scale=4):
     Args:
         hr_dir (str): Path to HR images
         output_dir (str): Output folder for LR images
-        scale (int): Reduction factor (e.g., 2, 3, 4)
+        scale (int): Reduction factor (e.g., 2, 4, 8)
     """
     os.makedirs(output_dir, exist_ok=True)
     hr_paths = list(Path(hr_dir).glob("*.png"))  # images in .png format
@@ -35,7 +35,7 @@ if __name__ == "__main__":
                         help="Path to downloaded HR data")
     parser.add_argument("--output_dir", type=str, default="data/processed/DIV2K",
                         help="Folder where to store generated LR images")
-    parser.add_argument("--scales", type=int, nargs="+", default=[2, 3, 4],
+    parser.add_argument("--scales", type=int, nargs="+", default=[2, 4, 8],
                         help="Scale factors to generate (eg: 2 3 4)")
 
     args = parser.parse_args()
