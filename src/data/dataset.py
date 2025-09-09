@@ -41,6 +41,12 @@ class DIV2KDataset(Dataset):
         # Extract random patch
         hr_patch, lr_patch = self.random_crop(hr, lr, self.patch_size)
 
+        # Upscale LR → HR size (ex: 128x128 instead of 64x64)
+        scale = hr_patch.size[0] // lr_patch.size[0]
+        lr_patch = lr_patch.resize((self.patch_size * scale,
+                                    self.patch_size * scale),
+                                   resample=Image.BICUBIC)
+
         # Apply transformations
         hr_patch = self.transform(hr_patch)
         lr_patch = self.transform(lr_patch)
