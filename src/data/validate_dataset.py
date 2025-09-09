@@ -6,9 +6,7 @@ import json
 
 def validate_dataset(hr_dir, lr_dir, scales=[2, 4, 8]):
     report = {"missing_lr": [], "wrong_size": [], "wrong_mode": [], "stats": {}}
-    
     hr_images = sorted(glob.glob(os.path.join(hr_dir, "*.png")))
-    
     for hr_path in hr_images:
         image_id = os.path.splitext(os.path.basename(hr_path))[0]
         hr = Image.open(hr_path)
@@ -24,11 +22,11 @@ def validate_dataset(hr_dir, lr_dir, scales=[2, 4, 8]):
         
         # Checks of the corresponding LRs
         for s in scales:
-            lr_path = os.path.join(lr_dir, f"_x{s}", f"/{image_id}.png")
+            base_dir = lr_dir + f"_x{s}"
+            lr_path = os.path.join(base_dir, f"{image_id}.png")
             if not os.path.exists(lr_path):
                 report["missing_lr"].append(lr_path)
                 continue
-            
             lr = Image.open(lr_path)
             
             # Check that the image is in RGB mode
@@ -48,8 +46,8 @@ def validate_dataset(hr_dir, lr_dir, scales=[2, 4, 8]):
     return report
 
 if __name__ == "__main__":
-    hr_dir = "../../data/raw/DIV2K/DIV2K_train_HR"
-    lr_dir = "../data/processed/DIV2K/DIV2K_train_LR"
+    hr_dir = "data/raw/DIV2K/DIV2K_train_HR"
+    lr_dir = "data/processed/DIV2K/DIV2K_train_LR"
 
     report = validate_dataset(hr_dir, lr_dir)
     
