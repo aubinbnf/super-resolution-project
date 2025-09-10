@@ -1,4 +1,8 @@
 [core]
-    remote = localremote
+    remote = gdrive_remote
 ['remote "localremote"']
     url = /home/aubin/dvc_remote/div2k
+['remote "gdrive_remote"']
+    url = gdrive://1PE0lsu57UBLmeqJbLraeZICTTy2ogi2N
+    gdrive_use_service_account = true
+    gdrive_service_account_json_file_path = /home/aubin/Dev/super-resolution-project/other/dvc.json
