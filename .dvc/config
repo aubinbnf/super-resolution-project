@@ -1,8 +1,11 @@
 [core]
-    remote = gdrive_remote
+    remote = scaleway-remote
 ['remote "localremote"']
     url = /home/aubin/dvc_remote/div2k
-['remote "gdrive_remote"']
-    url = gdrive://1PE0lsu57UBLmeqJbLraeZICTTy2ogi2N
-    gdrive_use_service_account = true
-    gdrive_service_account_json_file_path = /home/aubin/Dev/super-resolution-project/other/dvc.json
+['remote "scaleway-remote"']
+    url = s3://dvc-bucket/dvc-storage
+    endpointurl = https://s3.fr-par.scw.cloud
+    access_key_id = SCW75CNA8XFES60EZD10
+    secret_access_key = 3e755c76-ed0e-41b3-bce8-6c9e42f7ea5e
+    use_ssl = true
+    region = fr-par
