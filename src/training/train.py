@@ -39,7 +39,7 @@ val_loader = DataLoader(val_ds, batch_size=batch_size)
 # Model
 model = SRCNN()
 model = model.to(device)
-criterion = nn.MSELoss()
+criterion = nn.L1Loss()
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
 # Metrics
