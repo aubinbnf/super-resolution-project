@@ -15,10 +15,15 @@ import torch.optim as optim
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
+if torch.cuda.is_available():
+    print(f"GPU: {torch.cuda.get_device_name(0)}")
+
 # Hyperparams
 batch_size = 16
 lr = 1e-4
-epochs = 20
+epochs = 50
 
 # Dataset
 dataset = DIV2KDataset(hr_dir="data/raw/DIV2K/DIV2K_train_HR",
@@ -33,6 +38,7 @@ val_loader = DataLoader(val_ds, batch_size=batch_size)
 
 # Model
 model = SRCNN()
+model = model.to(device)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
@@ -55,6 +61,10 @@ for epoch in range(epochs):
     
     train_loss = 0.0
     for batch_idx, (lr_p, hr_p) in enumerate(train_loop):
+
+        lr_p = lr_p.to(device)
+        hr_p = hr_p.to(device)
+
         optimizer.zero_grad()
         sr = model(lr_p)
         loss = criterion(sr, hr_p)
@@ -74,6 +84,10 @@ for epoch in range(epochs):
                        unit="batch", leave=False)
         
         for lr_p, hr_p in val_loop:
+
+            lr_p = lr_p.to(device)
+            hr_p = hr_p.to(device)
+
             sr = model(lr_p)
             loss = criterion(sr, hr_p)
             val_loss += loss.item()
