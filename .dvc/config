@@ -1,7 +1,5 @@
 [core]
     remote = scaleway-remote
-[cache]
-    dir = /content/drive/MyDrive/DVC
 ['remote "localremote"']
     url = /home/aubin/dvc_remote/div2k
 ['remote "scaleway-remote"']

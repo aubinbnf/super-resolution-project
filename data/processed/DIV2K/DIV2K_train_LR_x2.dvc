@@ -1,0 +1,6 @@
+outs:
+- md5: 56c9aad0545798abd9116beaed4fbbe0.dir
+  size: 1085157138
+  nfiles: 800
+  hash: md5
+  path: DIV2K_train_LR_x2

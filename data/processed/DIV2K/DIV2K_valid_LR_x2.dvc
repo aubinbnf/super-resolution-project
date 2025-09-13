@@ -1,0 +1,6 @@
+outs:
+- md5: 16ac39213518fe69c8df52dc0e1ce57a.dir
+  size: 138065466
+  nfiles: 100
+  hash: md5
+  path: DIV2K_valid_LR_x2
