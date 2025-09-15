@@ -9,6 +9,7 @@ src_dir = os.path.dirname(current_dir)
 sys.path.insert(0, src_dir)
 import json
 from models.SRCNN import SRCNN
+from models.FSRCNN import FSRCNN
 from data.dataset import DIV2KDataset
 import torch.nn as nn
 import torch.optim as optim
@@ -27,8 +28,10 @@ epochs = 50
 
 # Dataset
 dataset = DIV2KDataset(hr_dir="data/raw/DIV2K/DIV2K_train_HR",
-                        lr_dir="data/processed/DIV2K/DIV2K_train_LR_x2",
-                        patch_size=64)
+                        lr_dir="data/processed/DIV2K/DIV2K_train_LR_x4",
+                        patch_size=64,
+                        scale_factor=4)
+
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
 train_ds, val_ds = random_split(dataset, [train_size, val_size])
@@ -37,7 +40,7 @@ train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_ds, batch_size=batch_size)
 
 # Model
-model = SRCNN()
+model = FSRCNN()
 model = model.to(device)
 criterion = nn.L1Loss()
 optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -113,9 +116,9 @@ for epoch in range(epochs):
     history["val_psnr"].append(float(avg_val_psnr))
     history["val_ssim"].append(float(avg_val_ssim))
 
-    with open("src/logs/srcnn_history.json", "w") as f:
+    with open("src/logs/fsrcnn_history.json", "w") as f:
         json.dump(history, f, indent=4)    
 
 # Save model
 os.makedirs("models", exist_ok=True)
-torch.save(model.state_dict(), "models/srcnn_baseline.pth")
+torch.save(model.state_dict(), "models/fsrcnn_baseline.pth")

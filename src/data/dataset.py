@@ -6,11 +6,12 @@ import torchvision.transforms as transforms
 import random
 
 class DIV2KDataset(Dataset):
-    def __init__(self, hr_dir, lr_dir, patch_size=64, transform=None):
+    def __init__(self, hr_dir, lr_dir, patch_size=64, scale_factor=4, transform=None):
         """
         hr_dir: HR image folder
         lr_dir: LR image folder (corresponding to HR)
         patch_size: Size of patches extracted for training
+        scale_factor: facteur d'échelle (2, 3, 4)
         transform: Transformations to apply to the images (optional)
         """
         self.hr_dir = hr_dir
@@ -18,6 +19,7 @@ class DIV2KDataset(Dataset):
         self.hr_images = sorted(os.listdir(hr_dir))
         self.lr_images = sorted(os.listdir(lr_dir))
         self.patch_size = patch_size
+        self.scale_factor = scale_factor
         self.transform = transform
 
         assert len(self.hr_images) == len(self.lr_images), "Different number of HR and LR images"
@@ -41,11 +43,11 @@ class DIV2KDataset(Dataset):
         # Extract random patch
         hr_patch, lr_patch = self.random_crop(hr, lr, self.patch_size)
 
-        # Upscale LR → HR size (ex: 128x128 instead of 64x64)
-        scale = hr_patch.size[0] // lr_patch.size[0]
-        lr_patch = lr_patch.resize((self.patch_size * scale,
-                                    self.patch_size * scale),
-                                   resample=Image.BICUBIC)
+        ## Upscale LR → HR size (ex: 128x128 instead of 64x64)
+        #scale = hr_patch.size[0] // lr_patch.size[0]
+        #lr_patch = lr_patch.resize((self.patch_size * scale,
+        #                            self.patch_size * scale),
+        #                           resample=Image.BICUBIC)
 
         # Apply transformations
         hr_patch = self.transform(hr_patch)
@@ -61,7 +63,7 @@ class DIV2KDataset(Dataset):
         # Calculating the upscaling factor
         scale_w = hr_w // lr_w
         scale_h = hr_h // lr_h
-        assert scale_w == scale_h, "Different upscaling factors in width and height"
+        assert scale_w == scale_h == self.scale_factor, f"Different upscaling factors : expected {self.scale_factor}, got {scale_w}"
         scale = scale_w
 
         # Random choice from the top left corner of the LR patch
@@ -69,10 +71,10 @@ class DIV2KDataset(Dataset):
         lr_y = random.randint(0, lr_h - patch_size)
 
         # HR corresponding patch
-        hr_x = lr_x * scale
-        hr_y = lr_y * scale
+        hr_x = lr_x * self.scale_factor
+        hr_y = lr_y * self.scale_factor
 
         lr_patch = lr.crop((lr_x, lr_y, lr_x + patch_size, lr_y + patch_size))
-        hr_patch = hr.crop((hr_x, hr_y, hr_x + patch_size*scale, hr_y + patch_size*scale))
+        hr_patch = hr.crop((hr_x, hr_y, hr_x + patch_size*self.scale_factor, hr_y + patch_size*self.scale_factor))
 
         return hr_patch, lr_patch
