@@ -27,10 +27,12 @@ lr = 1e-4
 epochs = 50
 
 # Dataset
-dataset = DIV2KDataset(hr_dir="data/raw/DIV2K/DIV2K_train_HR",
-                        lr_dir="data/processed/DIV2K/DIV2K_train_LR_x4",
-                        patch_size=64,
-                        scale_factor=4)
+dataset = DIV2KDataset(
+    hr_dir="../data/raw/DIV2K/DIV2K_train_HR",
+    lr_dir="../data/processed/DIV2K/DIV2K_train_LR_x4",
+    mode="fsrcnn",
+    scale_factor=4
+)
 
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
