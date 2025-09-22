@@ -1,5 +1,5 @@
 outs:
-- md5: fe0b75849d4444f1ab5cf451e6f65176
+- md5: f93cfb5da97413ad29f311129fc542ed
   size: 106566
   hash: md5
   path: fsrcnn_baseline.pth
