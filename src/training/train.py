@@ -28,8 +28,8 @@ epochs = 50
 
 # Dataset
 dataset = DIV2KDataset(
-    hr_dir="../data/raw/DIV2K/DIV2K_train_HR",
-    lr_dir="../data/processed/DIV2K/DIV2K_train_LR_x4",
+    hr_dir="data/raw/DIV2K/DIV2K_train_HR",
+    lr_dir="data/processed/DIV2K/DIV2K_train_LR_x4",
     mode="fsrcnn",
     scale_factor=4
 )
