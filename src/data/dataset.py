@@ -6,11 +6,12 @@ import torchvision.transforms as transforms
 import random
 
 class DIV2KDataset(Dataset):
-    def __init__(self, hr_dir, lr_dir, patch_size=64, transform=None):
+    def __init__(self, hr_dir, lr_dir, patch_size=64, pre_upscaled=True, transform=None):
         """
         hr_dir: HR image folder
         lr_dir: LR image folder (corresponding to HR)
         patch_size: Size of patches extracted for training
+        pre_upscale: Should low resolution images be upscaled?
         transform: Transformations to apply to the images (optional)
         """
         self.hr_dir = hr_dir
@@ -18,6 +19,7 @@ class DIV2KDataset(Dataset):
         self.hr_images = sorted(os.listdir(hr_dir))
         self.lr_images = sorted(os.listdir(lr_dir))
         self.patch_size = patch_size
+        self.pre_upscaled = pre_upscaled
         self.transform = transform
 
         assert len(self.hr_images) == len(self.lr_images), "Different number of HR and LR images"
@@ -38,19 +40,18 @@ class DIV2KDataset(Dataset):
         hr = Image.open(hr_path).convert("RGB")
         lr = Image.open(lr_path).convert("RGB")
 
-        # Extract random patch
-        hr_patch, lr_patch = self.random_crop(hr, lr, self.patch_size)
+        # Extract random patch and scale factor
+        hr_patch, lr_patch, scale = self.random_crop(hr, lr, self.patch_size)
 
-        # Upscale LR → HR size (ex: 128x128 instead of 64x64)
-        scale = hr_patch.size[0] // lr_patch.size[0]
-        lr_patch = lr_patch.resize((self.patch_size * scale,
-                                    self.patch_size * scale),
-                                   resample=Image.BICUBIC)
+        # Upscale the LR image to HR dimension if necessary (ex: SRCNN model)
+        if self.pre_upscaled:
+            lr_patch = lr_patch.resize((self.patch_size * scale,
+                                        self.patch_size * scale),
+                                       resample=Image.BICUBIC)
 
         # Apply transformations
         hr_patch = self.transform(hr_patch)
         lr_patch = self.transform(lr_patch)
-
         return lr_patch, hr_patch
 
     def random_crop(self, hr, lr, patch_size):
@@ -75,4 +76,4 @@ class DIV2KDataset(Dataset):
         lr_patch = lr.crop((lr_x, lr_y, lr_x + patch_size, lr_y + patch_size))
         hr_patch = hr.crop((hr_x, hr_y, hr_x + patch_size*scale, hr_y + patch_size*scale))
 
-        return hr_patch, lr_patch
+        return hr_patch, lr_patch, scale

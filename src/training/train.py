@@ -23,12 +23,14 @@ if torch.cuda.is_available():
 # Hyperparams
 batch_size = 16
 lr = 1e-4
-epochs = 50
+epochs = 20
 
 # Dataset
 dataset = DIV2KDataset(hr_dir="data/raw/DIV2K/DIV2K_train_HR",
-                        lr_dir="data/processed/DIV2K/DIV2K_train_LR_x2",
-                        patch_size=64)
+                        lr_dir="data/processed/DIV2K/DIV2K_train_LR_x4",
+                        patch_size=64,
+                        pre_upscaled=True)
+
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
 train_ds, val_ds = random_split(dataset, [train_size, val_size])
