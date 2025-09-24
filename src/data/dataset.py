@@ -6,23 +6,21 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 
 class DIV2KDataset(Dataset):
-    def __init__(self, hr_dir, lr_dir, patch_size=64, scale_factor=4, 
-                 mode="srcnn", transform=None):
+    def __init__(self, hr_dir, lr_dir, patch_size=64, pre_upscaled=True, transform=None):
         """
         hr_dir: HR image folder
         lr_dir: LR image folder (corresponding to HR)
-        patch_size: Size of LR patches extracted for training
-        scale_factor: upscaling factor (2, 3, 4, ...)
-        mode: "srcnn" (input = bicubic-upscaled LR) or "fsrcnn" (input = LR raw)
-        transform: optional torchvision transforms
+        patch_size: Size of patches extracted for training
+        pre_upscale: Should low resolution images be upscaled?
+        transform: Transformations to apply to the images (optional)
         """
         self.hr_dir = hr_dir
         self.lr_dir = lr_dir
         self.hr_images = sorted(os.listdir(hr_dir))
         self.lr_images = sorted(os.listdir(lr_dir))
         self.patch_size = patch_size
-        self.scale_factor = scale_factor
-        self.mode = mode
+        self.pre_upscaled = pre_upscaled
+        self.transform = transform
 
         assert len(self.hr_images) == len(self.lr_images), \
             "Different number of HR and LR images"
@@ -42,28 +40,19 @@ class DIV2KDataset(Dataset):
         hr = Image.open(hr_path).convert("RGB")
         lr = Image.open(lr_path).convert("RGB")
 
-        hr_patch, lr_patch = self.random_crop(hr, lr, self.patch_size)
+        # Extract random patch and scale factor
+        hr_patch, lr_patch, scale = self.random_crop(hr, lr, self.patch_size)
 
-        if self.mode == "srcnn":
-            # Upscale LR patch to HR size with bicubic
-            lr_patch = lr_patch.resize(
-                (self.patch_size * self.scale_factor,
-                 self.patch_size * self.scale_factor),
-                resample=Image.BICUBIC
-            )
-            # Retourne (lr_up, hr)
-            lr_patch = self.transform(lr_patch)
-            hr_patch = self.transform(hr_patch)
-            return lr_patch, hr_patch
+        # Upscale the LR image to HR dimension if necessary (ex: SRCNN model)
+        if self.pre_upscaled:
+            lr_patch = lr_patch.resize((self.patch_size * scale,
+                                        self.patch_size * scale),
+                                       resample=Image.BICUBIC)
 
-        elif self.mode == "fsrcnn":
-            # Retourne directement (lr, hr)
-            lr_patch = self.transform(lr_patch)
-            hr_patch = self.transform(hr_patch)
-            return lr_patch, hr_patch
-
-        else:
-            raise ValueError(f"Unknown mode {self.mode}")
+        # Apply transformations
+        hr_patch = self.transform(hr_patch)
+        lr_patch = self.transform(lr_patch)
+        return lr_patch, hr_patch
 
     def random_crop(self, hr, lr, patch_size):
         """Extract a patch LR of size patch_size, and the corresponding HR patch"""
@@ -88,4 +77,4 @@ class DIV2KDataset(Dataset):
                             hr_x + patch_size*self.scale_factor,
                             hr_y + patch_size*self.scale_factor))
 
-        return hr_patch, lr_patch
+        return hr_patch, lr_patch, scale
