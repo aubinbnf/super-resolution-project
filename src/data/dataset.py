@@ -1,9 +1,9 @@
 import os
-import random
 from PIL import Image
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
+import random
 
 class DIV2KDataset(Dataset):
     def __init__(self, hr_dir, lr_dir, patch_size=64, pre_upscaled=True, transform=None):
@@ -22,19 +22,19 @@ class DIV2KDataset(Dataset):
         self.pre_upscaled = pre_upscaled
         self.transform = transform
 
-        assert len(self.hr_images) == len(self.lr_images), \
-            "Different number of HR and LR images"
+        assert len(self.hr_images) == len(self.lr_images), "Different number of HR and LR images"
 
-        # Default transform
+        # Default transformations if none provided
         if transform is None:
-            self.transform = transforms.ToTensor()
-        else:
-            self.transform = transform
+            self.transform = transforms.Compose([
+                transforms.ToTensor()  # convert [0,255] -> [0,1] et HWC -> CHW
+            ])
 
     def __len__(self):
         return len(self.hr_images)
 
     def __getitem__(self, idx):
+        # Launch images
         hr_path = os.path.join(self.hr_dir, self.hr_images[idx])
         lr_path = os.path.join(self.lr_dir, self.lr_images[idx])
         hr = Image.open(hr_path).convert("RGB")
@@ -55,26 +55,25 @@ class DIV2KDataset(Dataset):
         return lr_patch, hr_patch
 
     def random_crop(self, hr, lr, patch_size):
-        """Extract a patch LR of size patch_size, and the corresponding HR patch"""
+        """Extracts a random patch of size patch_size x patch_size"""
         hr_w, hr_h = hr.size
         lr_w, lr_h = lr.size
 
+        # Calculating the upscaling factor
         scale_w = hr_w // lr_w
         scale_h = hr_h // lr_h
-        assert scale_w == scale_h == self.scale_factor, \
-            f"Expected scale {self.scale_factor}, got {scale_w}x{scale_h}"
+        assert scale_w == scale_h, "Different upscaling factors in width and height"
+        scale = scale_w
 
-        # Random coords in LR
+        # Random choice from the top left corner of the LR patch
         lr_x = random.randint(0, lr_w - patch_size)
         lr_y = random.randint(0, lr_h - patch_size)
 
-        # HR coords aligned
-        hr_x = lr_x * self.scale_factor
-        hr_y = lr_y * self.scale_factor
+        # HR corresponding patch
+        hr_x = lr_x * scale
+        hr_y = lr_y * scale
 
         lr_patch = lr.crop((lr_x, lr_y, lr_x + patch_size, lr_y + patch_size))
-        hr_patch = hr.crop((hr_x, hr_y,
-                            hr_x + patch_size*self.scale_factor,
-                            hr_y + patch_size*self.scale_factor))
+        hr_patch = hr.crop((hr_x, hr_y, hr_x + patch_size*scale, hr_y + patch_size*scale))
 
         return hr_patch, lr_patch, scale

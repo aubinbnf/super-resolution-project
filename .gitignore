@@ -1,2 +1,4 @@
 .venv/
 other/
+src/models/__pycache__/
+src/data/__pycache__/
