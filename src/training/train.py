@@ -28,7 +28,7 @@ epochs = 20
 # Dataset
 dataset = DIV2KDataset(hr_dir="data/raw/DIV2K/DIV2K_train_HR",
                         lr_dir="data/processed/DIV2K/DIV2K_train_LR_x4",
-                        patch_size=64,
+                        patch_size=100,
                         pre_upscaled=True)
 
 train_size = int(0.8 * len(dataset))
