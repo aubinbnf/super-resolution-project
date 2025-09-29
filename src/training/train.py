@@ -28,7 +28,7 @@ epochs = 20
 # Dataset
 dataset = DIV2KDataset(hr_dir="data/raw/DIV2K/DIV2K_train_HR",
                         lr_dir="data/processed/DIV2K/DIV2K_train_LR_x4",
-                        patch_size=100,
+                        patch_size=64,
                         pre_upscaled=True)
 
 train_size = int(0.8 * len(dataset))
@@ -41,7 +41,7 @@ val_loader = DataLoader(val_ds, batch_size=batch_size)
 # Model
 model = SRCNN()
 model = model.to(device)
-criterion = nn.MSELoss()
+criterion = nn.L1Loss()
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
 # Metrics
